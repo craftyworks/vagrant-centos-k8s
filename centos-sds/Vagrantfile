@@ -1,0 +1,52 @@
+$script = <<-SCRIPT
+
+# 인증서 등록
+cp /tmp/SDS.crt /etc/pki/ca-trust/source/anchors/
+update-ca-trust extract
+
+# ssh 접속 시 password 인증으로 변경 
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config    
+systemctl restart sshd.service
+
+# Timezone
+rm /etc/localtime
+ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+
+# locale
+localedef -i ko_KR -f UTF-8 ko_KR.utf8
+echo 'LANG=ko_KR.UTF-8' > /etc/locale.conf
+source /etc/locale.conf
+
+# 시간 동기화
+yum install chrony -y
+systemctl enable chronyd
+systemctl start chronyd
+sed -i 's/^server /#server /g' /etc/chrony.conf
+echo '
+server time.bora.net iburst
+server send.mx.cdnetworks.com iburst' >> /etc/chrony.conf
+systemctl restart chronyd
+timedatectl set-ntp true
+
+SCRIPT
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+  config.vm.provider "hyperv"
+  
+  # VM Proxy 설정
+  config.proxy.http = "http://70.10.15.10:8080"
+  config.proxy.https = "http://70.10.15.10:8080"
+  config.proxy.no_proxy = "localhost,127.0.0.1,redii.net,*.redii.net"
+
+  # 현재 폴더를 Guest OS 의 /vagrant 폴더로 마운트
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  # SDS.crt 파일을 Guest OS 의 /tmp/ 경로에 복사
+  # 복사된 파일은 root 권한으로 실행되는 inline script 에서 인증서 저장경로로 복사
+  config.vm.provision "file", source: "./SDS.crt", destination: "/tmp/SDS.crt"
+
+  # 인증서 등록
+  config.vm.provision "shell", inline: $script
+
+end
