@@ -34,3 +34,13 @@ for (( i=1; i<=$1; i++ )); do echo "192.168.1.10$i w$i-k8s" >> /etc/hosts; done
 #nameserver 8.8.8.8 #Google DNS
 #EOF
 
+cat <<EOF >> ~/.bashrc
+alias k=kubectl
+source <(kubectl completion bash)k
+complete -F __start_kubectl k
+EOF
+
+cat <<EOF >> ~/.vimrc
+set tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+set ai
+EOF

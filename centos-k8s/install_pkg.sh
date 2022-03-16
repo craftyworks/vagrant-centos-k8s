@@ -1,3 +1,6 @@
+33   git clone https://github.com/sysnet4admin/_Book_k8sInfra.git
+ 34   mv /home/vagrant/_Book_k8sInfra $HOME
+ 35   find $HOME/_Book_k8sInfra/ -regex ".*\/\(sh\)" -exec chmod 700 {} \;
 #!/usr/bin/env bash
 
 # yum repo
@@ -10,6 +13,7 @@
 # install packages
 yum install epel-release -y
 yum install vim-enhanced -y
+yum install bash-completion -y
 yum install git -y
 
 # install k8s cluster
@@ -22,7 +26,9 @@ systemctl enable --now kubelet
 # cat <<EOF >> /etc/sysconfig/docker
 # HTTP_PROXY="http://70.10.15.10:8080"
 # HTTPS_PROXY="http://70.10.15.10:8080"
-# NO_PROXY="localhost,127.0.0.1,70.,192.168.,redii.net,*.redii.net"
+# NO_PROXY="localhost,127.0.0.1,192.168.0.0/16,10.96.0.0/16,redii.net,*.redii.net"
+# sudo systemctl daemon-reload
+# sudo systemctl restart docker
 # EOF
 
 # git clone

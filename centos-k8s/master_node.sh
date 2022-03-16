@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # init k8s
-kubeadm init --token 123456.1234567890123456 --token-ttl 0 \
+kubeadm config images pull
+NO_PROXY=192.168.0.0/16,10.96.0.0/16,127.0.0.1,localhost kubeadm init --token 123456.1234567890123456 --token-ttl 0 \
 --pod-network-cidr=127.16.0.0/16 --apiserver-advertise-address=192.168.1.10
 
 # config for master node only
